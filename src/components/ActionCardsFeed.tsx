@@ -52,7 +52,7 @@ export default function ActionCardsFeed({
     setDismissedIds([...dismissedIds, id]);
     toast({
       title: 'Recommendation Dismissed',
-      description: "This recommendation won't show up again.", // Changed to double quotes
+      description: "This recommendation won't show up again.",
     });
   };
 
