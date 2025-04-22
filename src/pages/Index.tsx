@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,9 +10,18 @@ const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data: userData, isLoading } = useUserData();
+  const [isMounted, setIsMounted] = useState(true);
 
   useEffect(() => {
-    if (!isLoading) {
+    setIsMounted(true);
+    
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && isMounted) {
       // If user has already set up their profile, go to dashboard
       if (userData && userData.user_type) {
         navigate("/dashboard");
@@ -22,7 +31,7 @@ const Index = () => {
         navigate("/onboarding");
       }
     }
-  }, [userData, isLoading, navigate]);
+  }, [userData, isLoading, navigate, isMounted]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

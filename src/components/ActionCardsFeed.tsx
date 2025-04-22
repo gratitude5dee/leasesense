@@ -25,6 +25,7 @@ export default function ActionCardsFeed({
   sqFt?: number | null;
   paymentStatus?: PaymentStatus;
 }) {
+  console.log('ActionCardsFeed rendering', { userType, utilityData: utilityData.length });
   const { toast } = useToast();
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
@@ -38,7 +39,7 @@ export default function ActionCardsFeed({
     meta: {
       onError: (error: any) => {
         toast({
-          title: 'Error loading recommendations',
+          title: "Error loading recommendations",
           description: error.message,
           variant: 'destructive',
         });
