@@ -52,14 +52,14 @@ export default function ActionCardsFeed({
     setDismissedIds([...dismissedIds, id]);
     toast({
       title: 'Recommendation Dismissed',
-      description: "This recommendation won't show up again.",
+      description: "This recommendation will not show up again.",
     });
   };
 
   const handleLearnMore = (id: string) => {
     toast({
       title: 'Feature Coming Soon',
-      description: 'Detailed information will be available in a future update.',
+      description: "Detailed information will be available in a future update.",
     });
   };
 
