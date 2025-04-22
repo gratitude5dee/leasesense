@@ -35,12 +35,14 @@ export default function ActionCardsFeed({
   const { data: recommendations, isLoading, isError } = useQuery({
     queryKey: ['recommendations', userType, utilityData.length, sqFt],
     queryFn: () => generateRecommendations(utilityData, userType, sqFt || undefined),
-    onError: (error: any) => {
-      toast({
-        title: 'Error loading recommendations',
-        description: error.message,
-        variant: 'destructive',
-      });
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: 'Error loading recommendations',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     },
     // Only fetch if we have utility data
     enabled: utilityData.length > 0,

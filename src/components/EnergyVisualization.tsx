@@ -1,10 +1,11 @@
 
 import { useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame, extend } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import { UtilityDataPoint, CarbonIntensityData, VisualizationMode, TimeRange } from '@/types/energy';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { a, useSpring } from '@react-spring/three';
+import { useSpring, animated } from '@react-spring/three';
+import * as THREE from 'three';
 
 // Create a bar component for the visualization
 const Bar = ({ position, height, color, value, label }: { 
@@ -25,7 +26,7 @@ const Bar = ({ position, height, color, value, label }: {
   });
   
   return (
-    <a.mesh
+    <animated.mesh
       ref={meshRef}
       position={position}
       scale-y={scaleY}
@@ -43,7 +44,7 @@ const Bar = ({ position, height, color, value, label }: {
           </div>
         </Html>
       )}
-    </a.mesh>
+    </animated.mesh>
   );
 };
 

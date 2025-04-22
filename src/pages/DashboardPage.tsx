@@ -26,36 +26,42 @@ export default function DashboardPage() {
   const { data: utilityData, isLoading: isLoadingUtilityData } = useQuery({
     queryKey: ['utilityData', timeRange],
     queryFn: () => fetchUtilityData(timeRange),
-    onError: (error: any) => {
-      toast({
-        title: 'Error loading utility data',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: 'Error loading utility data',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
+    }
   });
 
   // Fetch carbon intensity data (using hardcoded values until we have real addresses)
   const { data: carbonData, isLoading: isLoadingCarbonData } = useQuery({
     queryKey: ['carbonIntensity'],
     queryFn: () => fetchCarbonIntensity(37.7749, -122.4194), // San Francisco coordinates as example
-    onError: (error: any) => {
-      toast({
-        title: 'Error loading carbon intensity data',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: 'Error loading carbon intensity data',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
+    }
   });
 
   // Check payment history
   const { data: paymentStatus, isLoading: isLoadingPaymentStatus } = useQuery({
     queryKey: ['paymentStatus'],
     queryFn: checkPaymentHistory,
-    onError: (error: any) => {
-      console.error('Error checking payment history:', error);
-      // Not showing a toast since this is not critical for the user experience
-    },
+    meta: {
+      onError: (error: any) => {
+        console.error('Error checking payment history:', error);
+        // Not showing a toast since this is not critical for the user experience
+      }
+    }
   });
 
   const isLoading = isLoadingUtilityData || isLoadingCarbonData || isLoadingUserData;
