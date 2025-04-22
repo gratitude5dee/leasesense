@@ -9,7 +9,101 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      benchmarks: {
+        Row: {
+          benchmark_type: Database["public"]["Enums"]["user_type"]
+          created_at: string
+          data_source: string
+          id: string
+          metric: Database["public"]["Enums"]["metric_type"]
+          period: string
+          value: number
+        }
+        Insert: {
+          benchmark_type: Database["public"]["Enums"]["user_type"]
+          created_at?: string
+          data_source: string
+          id?: string
+          metric: Database["public"]["Enums"]["metric_type"]
+          period: string
+          value: number
+        }
+        Update: {
+          benchmark_type?: Database["public"]["Enums"]["user_type"]
+          created_at?: string
+          data_source?: string
+          id?: string
+          metric?: Database["public"]["Enums"]["metric_type"]
+          period?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          bayou_access_token: string | null
+          created_at: string
+          id: string
+          sq_ft: number | null
+          updated_at: string
+          user_type: Database["public"]["Enums"]["user_type"]
+          utility_provider: string | null
+        }
+        Insert: {
+          address?: string | null
+          bayou_access_token?: string | null
+          created_at?: string
+          id: string
+          sq_ft?: number | null
+          updated_at?: string
+          user_type: Database["public"]["Enums"]["user_type"]
+          utility_provider?: string | null
+        }
+        Update: {
+          address?: string | null
+          bayou_access_token?: string | null
+          created_at?: string
+          id?: string
+          sq_ft?: number | null
+          updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+          utility_provider?: string | null
+        }
+        Relationships: []
+      }
+      user_actions: {
+        Row: {
+          created_at: string
+          id: string
+          recommendation_id: string
+          status: Database["public"]["Enums"]["recommendation_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recommendation_id: string
+          status?: Database["public"]["Enums"]["recommendation_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recommendation_id?: string
+          status?: Database["public"]["Enums"]["recommendation_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_actions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +112,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      metric_type: "kwh_per_sqft" | "avg_monthly_kwh" | "avg_monthly_cost"
+      recommendation_status: "seen" | "interested" | "dismissed"
+      user_type: "renter" | "shop"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +229,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      metric_type: ["kwh_per_sqft", "avg_monthly_kwh", "avg_monthly_cost"],
+      recommendation_status: ["seen", "interested", "dismissed"],
+      user_type: ["renter", "shop"],
+    },
   },
 } as const
