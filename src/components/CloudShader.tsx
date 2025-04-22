@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useWebGLSetup } from '@/hooks/useWebGLSetup';
 
 const CloudShader: React.FC = () => {
@@ -168,7 +168,7 @@ const CloudShader: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full z-[-1]"
+      className="w-full h-full"
       style={{ pointerEvents: 'none' }}
     />
   );

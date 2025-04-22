@@ -33,9 +33,14 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <PersonaProvider>
       <TooltipProvider>
-        <div className="app-container relative min-h-screen">
-          <CloudShader />
-          <main className="relative z-10">
+        {/* Updated layout structure for proper z-indexing */}
+        <div className="app-container relative min-h-screen overflow-hidden">
+          {/* Background layer with CloudShader */}
+          <div className="fixed inset-0 z-0">
+            <CloudShader />
+          </div>
+          {/* Content layer */}
+          <div className="relative z-10 min-h-screen">
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -68,7 +73,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </main>
+          </div>
         </div>
       </TooltipProvider>
     </PersonaProvider>
