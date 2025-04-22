@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -49,6 +50,14 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* New design system values */
+    --glass-opacity: 0.8;
+    --glass-blur: 12px;
+    --glass-border-opacity: 0.1;
+    --glass-shimmer: rgba(255, 255, 255, 0.05);
+    --card-shadow-strength: 15%;
+    --card-highlight: rgba(255, 255, 255, 0.08);
   }
 
   .dark {
@@ -87,6 +96,14 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Dark mode glass values */
+    --glass-opacity: 0.7;
+    --glass-blur: 12px;
+    --glass-border-opacity: 0.2;
+    --glass-shimmer: rgba(255, 255, 255, 0.03);
+    --card-shadow-strength: 40%;
+    --card-highlight: rgba(255, 255, 255, 0.05);
   }
 }
 
@@ -115,5 +132,142 @@
   /* Add background blur to modals and dropdowns */
   .modal, .dropdown {
     @apply backdrop-blur-sm;
+  }
+}
+
+/* Glassmorphism styles */
+@layer components {
+  .glassmorphic {
+    @apply bg-white/[var(--glass-opacity)] backdrop-blur-[var(--glass-blur)] 
+           border border-white/[var(--glass-border-opacity)]
+           relative overflow-hidden shadow-lg;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, var(--card-shadow-strength));
+  }
+  
+  .glassmorphic::before {
+    content: "";
+    @apply absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none;
+  }
+  
+  .glassmorphic-dark {
+    @apply bg-black/[var(--glass-opacity)] backdrop-blur-[var(--glass-blur)] 
+           border border-white/[var(--glass-border-opacity)]
+           relative overflow-hidden;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, var(--card-shadow-strength));
+  }
+  
+  /* Enhanced card styles */
+  .enhanced-card {
+    @apply glassmorphic rounded-xl transition-all duration-300 will-change-transform;
+    transform-style: preserve-3d;
+  }
+  
+  /* Card inner content that moves in 3D space */
+  .card-content-3d {
+    transform-style: preserve-3d;
+  }
+  
+  /* Floating card shadow */
+  .enhanced-card::after {
+    content: "";
+    @apply absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300;
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .enhanced-card:hover::after {
+    @apply opacity-100;
+  }
+  
+  /* Button hover effects */
+  .magnetic-button {
+    @apply relative transition-transform duration-200 will-change-transform;
+  }
+  
+  /* Subtle button glow effect */
+  .glow-effect {
+    @apply relative overflow-hidden;
+  }
+  
+  .glow-effect::before {
+    content: "";
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300 rounded-md;
+    background: radial-gradient(circle closest-side, var(--glass-shimmer), transparent);
+  }
+  
+  .glow-effect:hover::before {
+    @apply opacity-100;
+  }
+  
+  /* Card hover shimmer effect */
+  .shimmer-effect {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shimmer-effect::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.05) 20%,
+      rgba(255, 255, 255, 0.1) 60%,
+      rgba(255, 255, 255, 0)
+    );
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}
+
+/* Animation utilities */
+@layer utilities {
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+  
+  .animate-pulse-subtle {
+    animation: pulse-subtle 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+}
+
+/* Accessibility - Respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+  .glassmorphic, .enhanced-card, .magnetic-button, 
+  .shimmer-effect::after, .animate-float, .animate-pulse-subtle {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
   }
 }

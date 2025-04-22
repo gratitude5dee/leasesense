@@ -15,7 +15,7 @@ const CloudShader: React.FC = () => {
     }
   `;
 
-  // Fragment shader source with colors matching our new palette
+  // Enhanced fragment shader source with improved mouse interaction
   const fragmentShaderSource = `
     precision highp float;
     
@@ -68,7 +68,7 @@ const CloudShader: React.FC = () => {
       return 130.0 * dot(m, g);
     }
     
-    // Color palette function using our branding colors
+    // Enhanced color palette function using our branding colors
     vec3 palette(float t) {
       // Use our color variables
       vec3 baseDeep = vec3(0.039, 0.059, 0.153);      // #0A0F27
@@ -87,25 +87,26 @@ const CloudShader: React.FC = () => {
       vec2 p = uv * 2.0 - 1.0;
       p.x *= u_resolution.x / u_resolution.y;
       
-      // Mouse interaction
+      // Enhanced mouse interaction
       vec2 mousePos = u_mouse / u_resolution.xy;
       mousePos = mousePos * 2.0 - 1.0;
       mousePos.x *= u_resolution.x / u_resolution.y;
       
-      float mouseDistance = length(p - mousePos) * 0.5;
-      float mouseFactor = smoothstep(0.5, 0.0, mouseDistance);
+      float mouseDistance = length(p - mousePos);
+      float mouseFactor = smoothstep(0.8, 0.0, mouseDistance);
       
-      // Time variables
+      // Time variables with mouse influence
       float time = u_time * 0.1;
+      float mouseInfluencedTime = time + mouseFactor * 0.5;
       
       // Multiple layers of noise
       float noise = 0.0;
       
-      // Base layer
-      noise += 0.5 * snoise(p * 1.0 + vec2(time * 0.1, time * 0.1));
+      // Base layer with mouse distortion
+      noise += 0.5 * snoise(p * 1.0 + vec2(mouseInfluencedTime * 0.1, mouseInfluencedTime * 0.1));
       
-      // Medium detail layer
-      noise += 0.25 * snoise(p * 2.0 + vec2(time * 0.15, -time * 0.1));
+      // Medium detail layer with more mouse influence
+      noise += 0.25 * snoise(p * 2.0 + vec2(time * 0.15 + mouseFactor * 0.1, -time * 0.1));
       
       // Fine detail layer
       noise += 0.125 * snoise(p * 4.0 + vec2(-time * 0.2, time * 0.05));
@@ -113,21 +114,32 @@ const CloudShader: React.FC = () => {
       // Very fine detail
       noise += 0.0625 * snoise(p * 8.0 + vec2(time * 0.3, time * 0.2));
       
-      // Mouse interaction - add distortion
-      noise += mouseFactor * 0.1 * snoise(p * 15.0 + time);
+      // Enhanced mouse interaction - add warm glow around cursor
+      float glow = smoothstep(0.5, 0.0, mouseDistance) * 0.5;
+      
+      // Add ripple effect from mouse position
+      float ripple = sin(mouseDistance * 15.0 - u_time * 2.0) * 0.02 * mouseFactor;
+      noise += ripple;
       
       // Normalize and enhance contrast
       noise = 0.5 + 0.5 * noise;
       noise = smoothstep(0.4, 0.6, noise);
       
-      // Color based on noise
+      // Color based on noise with mouse influence
       vec3 color = palette(noise * 10.0 + time);
       
-      // Base gradient from deep color to slightly lighter version
+      // Enhanced base gradient
       vec3 baseGradient = mix(
         vec3(0.039, 0.059, 0.153), // #0A0F27 (base deep)
         vec3(0.078, 0.109, 0.267), // #141C44 (base deep lighter)
         uv.y
+      );
+      
+      // Add warmer tone near mouse cursor
+      baseGradient = mix(
+        baseGradient,
+        vec3(0.1, 0.05, 0.2), // Subtle purple tone
+        glow
       );
       
       // Add some subtle sparkles (small bright points)
@@ -142,11 +154,18 @@ const CloudShader: React.FC = () => {
         sparkle * 2.0
       );
       
-      // Blend everything together
+      // Blend everything together with enhanced mouse glow
       vec3 finalColor = mix(
         baseGradient,
         sparkleColor,
         noise * 0.5 + sparkle
+      );
+      
+      // Add extra glow near mouse position
+      finalColor = mix(
+        finalColor,
+        vec3(0.1, 0.5, 1.0), // Soft blue glow
+        smoothstep(0.3, 0.0, mouseDistance) * 0.3
       );
       
       // Add vignette effect

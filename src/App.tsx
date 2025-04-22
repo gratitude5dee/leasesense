@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { PersonaProvider } from "@/contexts/PersonaContext";
 import CloudShader from "./components/CloudShader";
+import NoiseTexture from "./components/ui/NoiseTexture";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -19,7 +20,13 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="glassmorphic p-8 rounded-xl animate-pulse-subtle">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
   }
   
   if (!user) {
@@ -39,6 +46,7 @@ const App = () => (
           <div className="fixed inset-0 z-0">
             <CloudShader />
           </div>
+          
           {/* Content layer */}
           <div className="relative z-10 min-h-screen">
             <Toaster />

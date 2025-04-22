@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,12 +14,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePersona } from '@/contexts/PersonaContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RefreshCcw } from 'lucide-react';
+import { NoiseTexture } from '@/components/ui/NoiseTexture';
+import { useMouseInteraction } from '@/hooks/useMouseInteraction';
 
 export default function DashboardPage() {
   const { toast } = useToast();
   const { persona } = usePersona();
   const [timeRange, setTimeRange] = useState<TimeRange>('day');
   const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('usage');
+  
+  // Refs for interactive elements
+  const refreshBtnRef = useRef<HTMLButtonElement>(null);
+  
+  // Magnetic button effect
+  const { magneticStyle: refreshBtnStyle } = useMouseInteraction(refreshBtnRef, {
+    magnetic: true,
+    magneticStrength: 0.3
+  });
 
   // Get user profile data
   const { data: userData, isLoading: isLoadingUserData } = useUserData();
@@ -83,8 +95,10 @@ export default function DashboardPage() {
   const isWaitingForBayou = !hasUtilityData && !isUtilityError;
 
   return (
-    <div className="min-h-screen pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen pb-8 relative">
+      <NoiseTexture opacity={0.015} className="fixed inset-0 z-0" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Energy Dashboard</h1>
@@ -94,28 +108,31 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex gap-2 mt-4 md:mt-0">
-            <Tabs value={visualizationMode} onValueChange={(v) => setVisualizationMode(v as VisualizationMode)}>
+            <Tabs value={visualizationMode} onValueChange={(v) => setVisualizationMode(v as VisualizationMode)} className="glassmorphic p-0.5">
               <TabsList>
-                <TabsTrigger value="usage">Usage</TabsTrigger>
-                <TabsTrigger value="cost">Cost</TabsTrigger>
-                <TabsTrigger value="emissions">Emissions</TabsTrigger>
+                <TabsTrigger value="usage" className="glow-effect">Usage</TabsTrigger>
+                <TabsTrigger value="cost" className="glow-effect">Cost</TabsTrigger>
+                <TabsTrigger value="emissions" className="glow-effect">Emissions</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
         </div>
 
         {isWaitingForBayou && (
-          <Alert className="mb-6 bg-blue-50/90 backdrop-blur-sm border-blue-200">
+          <Alert className="mb-6 glassmorphic bg-blue-50/90 backdrop-blur-sm border-blue-200 overflow-hidden">
+            <NoiseTexture opacity={0.01} />
             <AlertDescription className="flex items-center justify-between">
               <span>
                 Your utility data is being processed. This may take a few minutes after completing the authentication.
               </span>
               <Button 
+                ref={refreshBtnRef}
                 variant="outline" 
                 size="sm"
                 onClick={() => refetchUtilityData()}
                 disabled={isRefetchingUtility}
-                className="ml-2"
+                className="ml-2 magnetic-button"
+                style={refreshBtnStyle}
               >
                 <RefreshCcw className={`h-4 w-4 mr-1 ${isRefetchingUtility ? 'animate-spin' : ''}`} />
                 Refresh
@@ -129,6 +146,7 @@ export default function DashboardPage() {
             variant={timeRange === 'day' ? 'default' : 'outline'}
             onClick={() => setTimeRange('day')}
             size="sm"
+            className="glow-effect"
           >
             Day
           </Button>
@@ -136,6 +154,7 @@ export default function DashboardPage() {
             variant={timeRange === 'week' ? 'default' : 'outline'}
             onClick={() => setTimeRange('week')}
             size="sm"
+            className="glow-effect"
           >
             Week
           </Button>
@@ -143,13 +162,15 @@ export default function DashboardPage() {
             variant={timeRange === 'month' ? 'default' : 'outline'}
             onClick={() => setTimeRange('month')}
             size="sm"
+            className="glow-effect"
           >
             Month
           </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 bg-white/80 backdrop-blur-md">
+          <Card className="lg:col-span-2 glassmorphic overflow-hidden">
+            <NoiseTexture opacity={0.02} />
             <CardContent className="pt-6">
               {isLoading ? (
                 <div className="h-[400px] flex items-center justify-center">
