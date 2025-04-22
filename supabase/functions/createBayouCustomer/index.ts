@@ -7,6 +7,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Map of display names to Bayou utility codes for commonly used utilities
+const utilityCodeMap: Record<string, string> = {
+  "PG&E": "pge",
+  "Southern California Edison": "sce",
+  "San Diego Gas & Electric": "sdge",
+  "Austin Energy": "austin_energy",
+  "CPS Energy": "cps",
+  "Duke Energy": "duke_energy",
+  "Speculoos Power (Test)": "speculoos_power" // This is the test utility from the Quickstart
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -39,8 +50,13 @@ serve(async (req) => {
       });
     }
 
-    // Parse request body to get utility name
+    // Parse request body to get utility display name
     const { utility_name } = await req.json();
+
+    // Map the display name to a utility code or use as-is if not in the map
+    const utilityCode = utilityCodeMap[utility_name] || utility_name;
+    
+    console.log(`Mapped utility name "${utility_name}" to code "${utilityCode}"`);
 
     // Prepare Bayou API request
     const bayouApiKey = Deno.env.get('BAYOU_API_KEY');
@@ -60,15 +76,17 @@ serve(async (req) => {
         'Authorization': `Basic ${btoa(bayouApiKey + ':')}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ utility: utility_name }),
+      body: JSON.stringify({ utility: utilityCode }),
     });
 
     const customerData = await bayouResponse.json();
 
     if (!bayouResponse.ok) {
+      console.error('Bayou API error:', customerData);
       return new Response(JSON.stringify({ 
         error: 'Failed to create Bayou customer', 
-        details: customerData 
+        details: customerData,
+        utility_used: utilityCode
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: bayouResponse.status,
@@ -99,6 +117,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
+    console.error('Function error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,

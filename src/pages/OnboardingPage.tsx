@@ -11,8 +11,21 @@ import { Constants } from '@/integrations/supabase/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePersona } from '@/contexts/PersonaContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertCircle } from 'lucide-react';
 
 type UserType = typeof Constants.public.Enums.user_type[number];
+
+// Map of display names to Bayou utility codes
+const UTILITY_OPTIONS = [
+  { label: "Speculoos Power (Test)", value: "Speculoos Power (Test)" },
+  { label: "PG&E", value: "PG&E" },
+  { label: "Southern California Edison", value: "Southern California Edison" },
+  { label: "San Diego Gas & Electric", value: "San Diego Gas & Electric" },
+  { label: "Austin Energy", value: "Austin Energy" },
+  { label: "CPS Energy", value: "CPS Energy" },
+  { label: "Duke Energy", value: "Duke Energy" }
+];
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
@@ -23,13 +36,16 @@ export default function OnboardingPage() {
   const [selectedPersona, setSelectedPersona] = useState<UserType>('renter');
   const [sqFt, setSqFt] = useState<string>('');
   const [address, setAddress] = useState<string>('');
-  const [utilityProvider, setUtilityProvider] = useState<string>('speculoos_power');
+  const [utilityProvider, setUtilityProvider] = useState<string>("Speculoos Power (Test)");
   const [onboardingLink, setOnboardingLink] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   // Mutation for creating Bayou customer
   const createBayouCustomerMutation = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('User not authenticated');
+      
+      setError(null);
       
       const { data, error } = await supabase.functions.invoke('createBayouCustomer', {
         body: { utility_name: utilityProvider }
@@ -46,9 +62,11 @@ export default function OnboardingPage() {
       });
     },
     onError: (error: any) => {
+      console.error("Bayou customer creation error:", error);
+      setError(error.message || "Failed to connect to utility provider");
       toast({
         title: 'Error',
-        description: error.message,
+        description: error.message || "Failed to connect to utility provider",
         variant: 'destructive',
       });
     }
@@ -78,6 +96,7 @@ export default function OnboardingPage() {
       // Trigger Bayou customer creation
       createBayouCustomerMutation.mutate();
     } catch (error: any) {
+      setError(error.message || "Failed to update profile");
       toast({
         title: 'Error',
         description: error.message,
@@ -148,30 +167,57 @@ export default function OnboardingPage() {
 
             <div className="space-y-2">
               <Label htmlFor="utility">Utility Provider</Label>
-              <Input
-                id="utility"
-                placeholder="Enter your utility provider"
-                value={utilityProvider}
-                onChange={(e) => setUtilityProvider(e.target.value)}
-              />
+              <Select 
+                value={utilityProvider} 
+                onValueChange={(value) => setUtilityProvider(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a utility provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  {UTILITY_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Use "Speculoos Power (Test)" for testing purposes
+              </p>
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 p-3 rounded-md flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-red-800 text-sm font-medium">Error connecting utility</p>
+                  <p className="text-red-700 text-xs">{error}</p>
+                </div>
+              </div>
+            )}
 
             {onboardingLink && (
               <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
-                <p className="text-yellow-800 text-sm">
-                  Please open this link in a new tab to authenticate your utility account:
+                <p className="text-yellow-800 text-sm font-medium">
+                  Action Required: Please authenticate your utility account
+                </p>
+                <p className="text-yellow-700 text-sm mb-2">
+                  Open the link below in a new browser tab to connect your account:
                 </p>
                 <a 
                   href={onboardingLink} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline break-all"
+                  className="text-blue-600 hover:underline break-all text-sm"
                 >
                   {onboardingLink}
                 </a>
-                <p className="text-xs text-yellow-700 mt-2">
-                  Use Email: iamvalid@bayou.energy and Password: validpassword for testing.
-                </p>
+                <div className="mt-3 bg-blue-50 border border-blue-100 p-2 rounded">
+                  <p className="text-xs text-blue-700 font-medium">Testing Credentials:</p>
+                  <p className="text-xs text-blue-700">Email: iamvalid@bayou.energy</p>
+                  <p className="text-xs text-blue-700">Password: validpassword</p>
+                </div>
               </div>
             )}
           </CardContent>
@@ -180,9 +226,9 @@ export default function OnboardingPage() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loading}
+                disabled={loading || createBayouCustomerMutation.isPending}
               >
-                {loading ? 'Connecting...' : 'Connect Utility'}
+                {loading || createBayouCustomerMutation.isPending ? 'Connecting...' : 'Connect Utility'}
               </Button>
             ) : (
               <Button
