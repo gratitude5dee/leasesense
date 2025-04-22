@@ -16,7 +16,7 @@ const utilityCodeMap: Record<string, string> = {
   "Austin Energy": "austin_energy",
   "CPS Energy": "cps_energy",
   "Duke Energy": "duke_energy_carolinas",
-  "Speculoos Power (Test)": "demo"
+  "Speculoos Power (Test)": "speculoos_power"  // This was incorrect - fixing to use proper code
 };
 
 serve(async (req) => {

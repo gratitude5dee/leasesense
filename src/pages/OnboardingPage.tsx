@@ -14,6 +14,7 @@ import { usePersona } from '@/contexts/PersonaContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle } from 'lucide-react';
 import { createBayouCustomer } from '@/lib/supabase-functions';
+import { NoiseTexture } from "@/components/ui/NoiseTexture";
 
 type UserType = typeof Constants.public.Enums.user_type[number];
 
@@ -146,8 +147,12 @@ export default function OnboardingPage() {
   };
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white/90 backdrop-blur-sm shadow-xl">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
+      {/* Add background elements for consistent UI with other pages */}
+      <NoiseTexture opacity={0.02} />
+      
+      <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm shadow-xl relative overflow-hidden border border-white/20">
+        <NoiseTexture opacity={0.01} />
         <CardHeader>
           <CardTitle className="text-2xl">Welcome to LeaseSense</CardTitle>
           <CardDescription>
@@ -185,6 +190,7 @@ export default function OnboardingPage() {
                 placeholder="123 Main St, City, State"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
+                className="bg-white/50 backdrop-blur-sm"
               />
             </div>
 
@@ -196,6 +202,7 @@ export default function OnboardingPage() {
                 placeholder="Enter square footage"
                 value={sqFt}
                 onChange={(e) => setSqFt(e.target.value)}
+                className="bg-white/50 backdrop-blur-sm"
               />
             </div>
 
@@ -205,7 +212,7 @@ export default function OnboardingPage() {
                 value={utilityProvider} 
                 onValueChange={(value) => setUtilityProvider(value)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-white/50 backdrop-blur-sm">
                   <SelectValue placeholder="Select a utility provider" />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,7 +229,7 @@ export default function OnboardingPage() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 p-3 rounded-md flex items-start gap-2">
+              <div className="bg-red-50/90 backdrop-blur-sm border border-red-200 p-3 rounded-md flex items-start gap-2">
                 <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-red-800 text-sm font-medium">Error connecting utility</p>
@@ -232,7 +239,7 @@ export default function OnboardingPage() {
             )}
 
             {onboardingLink && (
-              <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
+              <div className="bg-yellow-50/90 backdrop-blur-sm border border-yellow-200 p-3 rounded-md">
                 <p className="text-yellow-800 text-sm font-medium">
                   Action Required: Please authenticate your utility account
                 </p>
@@ -247,14 +254,14 @@ export default function OnboardingPage() {
                 >
                   {onboardingLink}
                 </a>
-                <div className="mt-3 bg-blue-50 border border-blue-100 p-2 rounded">
+                <div className="mt-3 bg-blue-50/90 backdrop-blur-sm border border-blue-100 p-2 rounded">
                   <p className="text-xs text-blue-700 font-medium">Testing Credentials:</p>
                   <p className="text-xs text-blue-700">Email: iamvalid@bayou.energy</p>
                   <p className="text-xs text-blue-700">Password: validpassword</p>
                 </div>
                 
                 {redirectCountdown !== null && (
-                  <div className="mt-3 bg-green-50 border border-green-100 p-2 rounded flex justify-between items-center">
+                  <div className="mt-3 bg-green-50/90 backdrop-blur-sm border border-green-100 p-2 rounded flex justify-between items-center">
                     <div>
                       <p className="text-xs text-green-700 font-medium">
                         Auto-redirecting to dashboard in {redirectCountdown} seconds...
