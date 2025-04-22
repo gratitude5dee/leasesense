@@ -1,55 +1,9 @@
-# Welcome to your Lovable project
-
-## Project info
-
-**URL**: https://lovable.dev/projects/848a2e41-47ab-47f1-8157-07ed6cb1ed20
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/848a2e41-47ab-47f1-8157-07ed6cb1ed20) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
+LeaseSense delivers “energy equity without ownership.” In minutes, tenants authenticate a utility or smart plug, pick “Home” or “Shop,” and receive a dashboard that:
+	•	Explains every dollar & kWh in plain language. Utility data is fetched via Bayou’s one‑click OAuth (<60 s) and normalized to 15‑min intervals, meeting Green‑Button standards.  
+	•	Benchmarks performance against anonymized peers (renters vs. cafés) using EIA RECS and CBECS medians.   
+	•	Recommends low‑lift actions (shift laundry, stagger espresso machines) engineered from NILM‑disaggregated device estimates.  
+	•	Generates shareable “Impact Proofs”—print‑friendly certificates that boost tenant–landlord conversations or green‑marketing for stores.
+	•	Surfaces rebates & C‑PACE financing paths when bigger upgrades make sense.   
 ## What technologies are used for this project?
 
 This project is built with:
