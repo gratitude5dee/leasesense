@@ -18,6 +18,17 @@ export const useWebGLSetup = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Force canvas to full window size
+    const resizeCanvas = () => {
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    };
+
+    // Initial resize
+    resizeCanvas();
+
     const gl = canvas.getContext('webgl');
     if (!gl) {
       console.error('WebGL not supported');
@@ -39,6 +50,19 @@ export const useWebGLSetup = ({
     gl.compileShader(vertexShader);
     gl.compileShader(fragmentShader);
 
+    // Check for shader compilation errors
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+      console.error('Vertex shader compilation error:', gl.getShaderInfoLog(vertexShader));
+      gl.deleteShader(vertexShader);
+      return;
+    }
+
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+      console.error('Fragment shader compilation error:', gl.getShaderInfoLog(fragmentShader));
+      gl.deleteShader(fragmentShader);
+      return;
+    }
+
     // Create and link program
     const program = gl.createProgram();
     if (!program) {
@@ -49,6 +73,14 @@ export const useWebGLSetup = ({
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
+
+    // Check for program link errors
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error('Program linking error:', gl.getProgramInfoLog(program));
+      gl.deleteProgram(program);
+      return;
+    }
+
     gl.useProgram(program);
 
     // Create buffer for vertices
@@ -85,8 +117,7 @@ export const useWebGLSetup = ({
 
     // Resize handler
     const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      resizeCanvas();
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
 
@@ -95,8 +126,11 @@ export const useWebGLSetup = ({
 
     // Animation loop
     let animationFrameId: number;
+    let isActive = true;
 
     const render = () => {
+      if (!isActive) return;
+      
       const time = (Date.now() - startTimeRef.current) / 1000;
       
       gl.uniform1f(timeLocation, time);
@@ -111,13 +145,16 @@ export const useWebGLSetup = ({
 
     // Cleanup
     return () => {
+      isActive = false;
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
-      gl.deleteProgram(program);
-      gl.deleteShader(vertexShader);
-      gl.deleteShader(fragmentShader);
-      gl.deleteBuffer(buffer);
+      if (gl) {
+        gl.deleteProgram(program);
+        gl.deleteShader(vertexShader);
+        gl.deleteShader(fragmentShader);
+        gl.deleteBuffer(buffer);
+      }
     };
   }, [canvasRef, vertexShaderSource, fragmentShaderSource, startTimeRef]);
 };

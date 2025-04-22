@@ -33,39 +33,43 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <PersonaProvider>
       <TooltipProvider>
-        <CloudShader />
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route
-              path="/"
-              element={
-                <PrivateRoute>
-                  <Index />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/onboarding"
-              element={
-                <PrivateRoute>
-                  <OnboardingPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <DashboardPage />
-                </PrivateRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <div className="app-container relative min-h-screen">
+          <CloudShader />
+          <main className="relative z-10">
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
+                <Route
+                  path="/"
+                  element={
+                    <PrivateRoute>
+                      <Index />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/onboarding"
+                  element={
+                    <PrivateRoute>
+                      <OnboardingPage />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <PrivateRoute>
+                      <DashboardPage />
+                    </PrivateRoute>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </main>
+        </div>
       </TooltipProvider>
     </PersonaProvider>
   </QueryClientProvider>

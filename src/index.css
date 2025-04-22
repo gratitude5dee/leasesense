@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -95,7 +96,20 @@
     @apply border-border;
   }
 
+  html, body {
+    @apply h-full w-full m-0 p-0 overflow-x-hidden;
+  }
+
   body {
-    @apply bg-background text-foreground antialiased overflow-hidden;
+    @apply bg-transparent text-foreground antialiased;
+  }
+
+  .app-container {
+    @apply min-h-screen w-full;
+  }
+
+  /* Make cards appear on top of the shader background */
+  .card {
+    @apply bg-white/90 backdrop-blur-sm z-10 relative;
   }
 }
