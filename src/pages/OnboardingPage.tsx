@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
@@ -13,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { usePersona } from '@/contexts/PersonaContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle } from 'lucide-react';
+import { createBayouCustomer } from '@/lib/supabase-functions';
 
 type UserType = typeof Constants.public.Enums.user_type[number];
 
@@ -47,12 +47,12 @@ export default function OnboardingPage() {
       
       setError(null);
       
-      const { data, error } = await supabase.functions.invoke('createBayouCustomer', {
-        body: { utility_name: utilityProvider }
-      });
-      
-      if (error) throw error;
-      return data;
+      try {
+        return await createBayouCustomer(utilityProvider);
+      } catch (error: any) {
+        console.error("Error creating Bayou customer:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setOnboardingLink(data.onboarding_link);
@@ -63,10 +63,19 @@ export default function OnboardingPage() {
     },
     onError: (error: any) => {
       console.error("Bayou customer creation error:", error);
-      setError(error.message || "Failed to connect to utility provider");
+      let errorMessage = "Failed to connect to utility provider";
+      
+      // Extract more specific error message if available
+      if (error.message && typeof error.message === 'string') {
+        errorMessage = error.message;
+      } else if (error.details) {
+        errorMessage = JSON.stringify(error.details);
+      }
+      
+      setError(errorMessage);
       toast({
         title: 'Error',
-        description: error.message || "Failed to connect to utility provider",
+        description: errorMessage,
         variant: 'destructive',
       });
     }

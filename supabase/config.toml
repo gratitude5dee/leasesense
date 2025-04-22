@@ -9,3 +9,9 @@ verify_jwt = true
 
 [functions.checkPaymentHistory]
 verify_jwt = true
+
+[functions.fetchCarbonIntensity]
+verify_jwt = true
+
+[functions.generateRecommendations]
+verify_jwt = true

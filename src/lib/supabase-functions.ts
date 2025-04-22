@@ -41,3 +41,16 @@ export async function checkPaymentHistory(): Promise<PaymentStatus> {
   if (error) throw error;
   return data;
 }
+
+export async function createBayouCustomer(utilityName: string): Promise<{ onboarding_link: string }> {
+  const { data, error } = await supabase.functions.invoke('createBayouCustomer', {
+    body: { utility_name: utilityName }
+  });
+  
+  if (error) {
+    console.error("Error creating Bayou customer:", error);
+    throw error;
+  }
+  
+  return data;
+}

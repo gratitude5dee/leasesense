@@ -13,9 +13,9 @@ const utilityCodeMap: Record<string, string> = {
   "Southern California Edison": "sce",
   "San Diego Gas & Electric": "sdge",
   "Austin Energy": "austin_energy",
-  "CPS Energy": "cps",
-  "Duke Energy": "duke_energy",
-  "Speculoos Power (Test)": "speculoos_power" // This is the test utility from the Quickstart
+  "CPS Energy": "cps_energy", // Fixed: was "cps" which is invalid per error message
+  "Duke Energy": "duke_energy_carolinas", // Updated to more specific code
+  "Speculoos Power (Test)": "demo" // Changed to "demo" which is the correct test utility code
 };
 
 serve(async (req) => {
@@ -44,11 +44,14 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
     
     if (authError || !user) {
+      console.error('Authentication error:', authError);
       return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 401,
       });
     }
+
+    console.log('Authenticated user:', user.id);
 
     // Parse request body to get utility display name
     const { utility_name } = await req.json();
@@ -63,11 +66,17 @@ serve(async (req) => {
     const bayouDomain = Deno.env.get('BAYOU_DOMAIN');
     
     if (!bayouApiKey || !bayouDomain) {
+      console.error('Missing Bayou configuration:', { 
+        hasBayouApiKey: !!bayouApiKey, 
+        hasBayouDomain: !!bayouDomain 
+      });
       return new Response(JSON.stringify({ error: 'Bayou API configuration missing' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
       });
     }
+
+    console.log('Creating Bayou customer for utility:', utilityCode);
 
     // Create Bayou customer
     const bayouResponse = await fetch(`https://${bayouDomain}/api/v2/customers`, {
@@ -79,7 +88,22 @@ serve(async (req) => {
       body: JSON.stringify({ utility: utilityCode }),
     });
 
-    const customerData = await bayouResponse.json();
+    const responseText = await bayouResponse.text();
+    console.log('Bayou API raw response:', responseText);
+    
+    let customerData;
+    try {
+      customerData = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Error parsing Bayou response:', e);
+      return new Response(JSON.stringify({ 
+        error: 'Invalid response from Bayou API',
+        details: responseText
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
 
     if (!bayouResponse.ok) {
       console.error('Bayou API error:', customerData);
@@ -93,6 +117,18 @@ serve(async (req) => {
       });
     }
 
+    // Check if the response contains the necessary customer data
+    if (!customerData.customer || !customerData.customer.id) {
+      console.error('Unexpected Bayou response structure:', customerData);
+      return new Response(JSON.stringify({
+        error: 'Invalid customer data structure from Bayou API',
+        details: customerData
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      });
+    }
+
     // Update user profile with Bayou customer ID
     const { error: updateError } = await supabase
       .from('profiles')
@@ -100,6 +136,7 @@ serve(async (req) => {
       .eq('id', user.id);
 
     if (updateError) {
+      console.error('Error updating profile:', updateError);
       return new Response(JSON.stringify({ 
         error: 'Failed to update user profile', 
         details: updateError 
@@ -108,6 +145,8 @@ serve(async (req) => {
         status: 500,
       });
     }
+
+    console.log('Successfully created Bayou customer and updated profile');
 
     // Return onboarding link
     return new Response(JSON.stringify({ 
