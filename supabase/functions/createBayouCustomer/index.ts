@@ -39,27 +39,62 @@ serve(async (req) => {
       });
     }
 
-    // Fetch bills data from the fetchUtilityData function
-    const { data: billsData } = await supabase.functions.invoke('fetchUtilityData', {
-      headers: { authorization: authHeader },
-    });
+    // Parse request body to get utility name
+    const { utility_name } = await req.json();
 
-    // Determine payment status based on bills
-    if (!billsData || !billsData.bills || billsData.bills.length === 0) {
-      return new Response(JSON.stringify({ status: 'Not Available' }), {
+    // Prepare Bayou API request
+    const bayouApiKey = Deno.env.get('BAYOU_API_KEY');
+    const bayouDomain = Deno.env.get('BAYOU_DOMAIN');
+    
+    if (!bayouApiKey || !bayouDomain) {
+      return new Response(JSON.stringify({ error: 'Bayou API configuration missing' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
       });
     }
 
-    // Check payment status of recent bills
-    const recentBills = billsData.bills.slice(-3); // Last 3 bills
-    const hasOverdueBill = recentBills.some((bill: any) => 
-      bill.is_paid === false && new Date(bill.due_date) < new Date()
-    );
+    // Create Bayou customer
+    const bayouResponse = await fetch(`https://${bayouDomain}/api/v2/customers`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${btoa(bayouApiKey + ':')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ utility: utility_name }),
+    });
 
-    const status = hasOverdueBill ? 'Overdue' : 'Good Standing';
+    const customerData = await bayouResponse.json();
 
-    return new Response(JSON.stringify({ status }), {
+    if (!bayouResponse.ok) {
+      return new Response(JSON.stringify({ 
+        error: 'Failed to create Bayou customer', 
+        details: customerData 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: bayouResponse.status,
+      });
+    }
+
+    // Update user profile with Bayou customer ID
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ bayou_customer_id: customerData.customer.id })
+      .eq('id', user.id);
+
+    if (updateError) {
+      return new Response(JSON.stringify({ 
+        error: 'Failed to update user profile', 
+        details: updateError 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
+    // Return onboarding link
+    return new Response(JSON.stringify({ 
+      onboarding_link: customerData.customer.onboarding_link 
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
