@@ -7,15 +7,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Map of display names to Bayou utility codes for commonly used utilities
+// Updated with verified utility codes from Bayou's documentation
+// https://docs.bayou.energy/reference/utility-support
 const utilityCodeMap: Record<string, string> = {
   "PG&E": "pge",
   "Southern California Edison": "sce",
   "San Diego Gas & Electric": "sdge",
   "Austin Energy": "austin_energy",
-  "CPS Energy": "cps_energy", // Fixed: was "cps" which is invalid per error message
-  "Duke Energy": "duke_energy_carolinas", // Updated to more specific code
-  "Speculoos Power (Test)": "demo" // Changed to "demo" which is the correct test utility code
+  "CPS Energy": "cps_energy",
+  "Duke Energy": "duke_energy_carolinas",
+  "Speculoos Power (Test)": "demo"
 };
 
 serve(async (req) => {

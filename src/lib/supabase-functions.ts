@@ -43,14 +43,23 @@ export async function checkPaymentHistory(): Promise<PaymentStatus> {
 }
 
 export async function createBayouCustomer(utilityName: string): Promise<{ onboarding_link: string }> {
-  const { data, error } = await supabase.functions.invoke('createBayouCustomer', {
-    body: { utility_name: utilityName }
-  });
-  
-  if (error) {
+  try {
+    const { data, error } = await supabase.functions.invoke('createBayouCustomer', {
+      body: { utility_name: utilityName }
+    });
+    
+    if (error) {
+      console.error("Error creating Bayou customer:", error);
+      throw error;
+    }
+    
+    if (!data || !data.onboarding_link) {
+      throw new Error("Invalid response from Bayou API");
+    }
+    
+    return data;
+  } catch (error) {
     console.error("Error creating Bayou customer:", error);
     throw error;
   }
-  
-  return data;
 }
