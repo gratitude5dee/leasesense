@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,23 @@ export default function OnboardingPage() {
   const [utilityProvider, setUtilityProvider] = useState<string>("Speculoos Power (Test)");
   const [onboardingLink, setOnboardingLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
+  
+  // Effect for auto-redirecting after countdown
+  useEffect(() => {
+    if (redirectCountdown === null) return;
+    
+    if (redirectCountdown <= 0) {
+      navigate('/dashboard');
+      return;
+    }
+    
+    const timer = setTimeout(() => {
+      setRedirectCountdown(redirectCountdown - 1);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, [redirectCountdown, navigate]);
   
   // Mutation for creating Bayou customer
   const createBayouCustomerMutation = useMutation({
@@ -60,6 +78,9 @@ export default function OnboardingPage() {
         title: 'Utility Connection',
         description: 'Please complete the utility account authentication in the provided link.',
       });
+      
+      // Start countdown for auto-redirect
+      setRedirectCountdown(30);
     },
     onError: (error: any) => {
       console.error("Bayou customer creation error:", error);
@@ -118,6 +139,10 @@ export default function OnboardingPage() {
   
   const handleContinueToDashboard = () => {
     navigate('/dashboard');
+  };
+
+  const handleCancelRedirect = () => {
+    setRedirectCountdown(null);
   };
   
   return (
@@ -227,6 +252,27 @@ export default function OnboardingPage() {
                   <p className="text-xs text-blue-700">Email: iamvalid@bayou.energy</p>
                   <p className="text-xs text-blue-700">Password: validpassword</p>
                 </div>
+                
+                {redirectCountdown !== null && (
+                  <div className="mt-3 bg-green-50 border border-green-100 p-2 rounded flex justify-between items-center">
+                    <div>
+                      <p className="text-xs text-green-700 font-medium">
+                        Auto-redirecting to dashboard in {redirectCountdown} seconds...
+                      </p>
+                      <p className="text-xs text-green-700">
+                        Your data will be processed in the background
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleCancelRedirect}
+                      className="text-xs h-7"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

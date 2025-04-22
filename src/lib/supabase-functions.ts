@@ -3,12 +3,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { CarbonIntensityData, PaymentStatus, Recommendation, UtilityDataPoint } from "@/types/energy";
 
 export async function fetchUtilityData(period: string): Promise<UtilityDataPoint[]> {
-  const { data, error } = await supabase.functions.invoke('fetchUtilityData', {
-    body: { period },
-  });
+  try {
+    const { data, error } = await supabase.functions.invoke('fetchUtilityData', {
+      body: { period },
+    });
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    
+    // If data is an empty array or null/undefined, return an empty array
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return [];
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error fetching utility data:", error);
+    return [];  // Return empty array on error for more resilient UX
+  }
 }
 
 export async function fetchCarbonIntensity(lat: number, lon: number): Promise<CarbonIntensityData> {
@@ -34,12 +45,17 @@ export async function generateRecommendations(
 }
 
 export async function checkPaymentHistory(): Promise<PaymentStatus> {
-  const { data, error } = await supabase.functions.invoke('checkPaymentHistory', {
-    body: {},
-  });
+  try {
+    const { data, error } = await supabase.functions.invoke('checkPaymentHistory', {
+      body: {},
+    });
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error checking payment history:", error);
+    return { status: 'Not Available' };  // Return a safe default on error
+  }
 }
 
 export async function createBayouCustomer(utilityName: string): Promise<{ onboarding_link: string }> {

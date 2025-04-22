@@ -74,6 +74,8 @@ serve(async (req) => {
 
     // Data readiness polling
     let customerDetails;
+    let dataIsReady = false;
+    
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       const customerResponse = await fetch(`https://${bayouDomain}/api/v2/customers/${profileData.bayou_customer_id}`, {
         headers: {
@@ -81,51 +83,87 @@ serve(async (req) => {
         },
       });
 
+      if (!customerResponse.ok) {
+        console.error(`Error fetching customer details: ${customerResponse.status} ${customerResponse.statusText}`);
+        if (attempt === MAX_RETRIES - 1) {
+          return new Response(JSON.stringify({ error: `Failed to fetch customer details: ${customerResponse.statusText}` }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 500,
+          });
+        }
+        await delay(RETRY_DELAY);
+        continue;
+      }
+
       customerDetails = await customerResponse.json();
+      console.log("Customer details:", JSON.stringify(customerDetails));
 
       // Check if credentials are filled and data is ready
-      if (customerDetails.customer.has_filled_credentials && 
+      if (customerDetails.customer && 
+          customerDetails.customer.has_filled_credentials && 
           customerDetails.customer.bills_are_ready && 
           customerDetails.customer.intervals_are_ready) {
+        dataIsReady = true;
         break;
       }
 
-      // Wait before retrying
-      await delay(RETRY_DELAY);
+      // Wait before retrying if we haven't reached max retries
+      if (attempt < MAX_RETRIES - 1) {
+        await delay(RETRY_DELAY);
+      }
     }
 
-    // Fetch bills
-    const billsResponse = await fetch(`https://${bayouDomain}/api/v2/customers/${profileData.bayou_customer_id}/bills`, {
-      headers: {
-        'Authorization': `Basic ${btoa(bayouApiKey + ':')}`,
-      },
-    });
-    const billsData = await billsResponse.json();
+    // If data is not ready after polling, return empty array
+    if (!dataIsReady) {
+      console.log("Data not ready after polling");
+      return new Response(JSON.stringify([]), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    // Fetch intervals
+    // Fetch intervals since data is ready
     const intervalsResponse = await fetch(`https://${bayouDomain}/api/v2/customers/${profileData.bayou_customer_id}/intervals`, {
       headers: {
         'Authorization': `Basic ${btoa(bayouApiKey + ':')}`,
       },
     });
+
+    if (!intervalsResponse.ok) {
+      console.error(`Error fetching intervals: ${intervalsResponse.status} ${intervalsResponse.statusText}`);
+      return new Response(JSON.stringify({ error: `Failed to fetch intervals: ${intervalsResponse.statusText}` }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
     const intervalsData = await intervalsResponse.json();
+    console.log("Intervals data sample:", JSON.stringify(intervalsData.meters?.slice(0, 1)));
 
-    // Normalize interval data
-    const normalizedIntervals = intervalsData.meters[0].intervals.map((interval: any) => ({
-      timestamp: interval.start_time,
-      kwh: interval.consumption,
-      cost: interval.cost
-    }));
+    // Normalize interval data - handle multiple meters
+    let normalizedIntervals = [];
+    
+    // Check if meters exist and handle multiple meters
+    if (intervalsData.meters && Array.isArray(intervalsData.meters)) {
+      // Iterate through all meters
+      intervalsData.meters.forEach(meter => {
+        if (meter.intervals && Array.isArray(meter.intervals)) {
+          const meterIntervals = meter.intervals.map(interval => ({
+            timestamp: interval.start_time,
+            kwh: interval.consumption || 0,
+            cost: interval.cost || 0
+          }));
+          normalizedIntervals = [...normalizedIntervals, ...meterIntervals];
+        }
+      });
+    }
 
-    return new Response(JSON.stringify({
-      intervals: normalizedIntervals,
-      bills: billsData.bills,
-      customerDetails: customerDetails.customer
-    }), {
+    // Return only the normalized intervals array to match the expected UtilityDataPoint[] type
+    return new Response(JSON.stringify(normalizedIntervals), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
+    console.error("Error in fetchUtilityData:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,

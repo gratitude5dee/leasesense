@@ -12,6 +12,8 @@ import { useUserData } from '@/hooks/useUserData';
 import { VisualizationMode, TimeRange } from '@/types/energy';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePersona } from '@/contexts/PersonaContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RefreshCcw } from 'lucide-react';
 
 export default function DashboardPage() {
   const { toast } = useToast();
@@ -23,9 +25,20 @@ export default function DashboardPage() {
   const { data: userData, isLoading: isLoadingUserData } = useUserData();
 
   // Fetch utility data
-  const { data: utilityData, isLoading: isLoadingUtilityData } = useQuery({
+  const { 
+    data: utilityData, 
+    isLoading: isLoadingUtilityData, 
+    error: utilityError,
+    refetch: refetchUtilityData,
+    isError: isUtilityError,
+    isRefetching: isRefetchingUtility
+  } = useQuery({
     queryKey: ['utilityData', timeRange],
     queryFn: () => fetchUtilityData(timeRange),
+    refetchInterval: 30000, // Poll every 30 seconds if data is empty (likely still processing)
+    refetchIntervalInBackground: true,
+    refetchOnMount: true,
+    retry: 3,
     meta: {
       onError: (error: any) => {
         toast({
@@ -65,6 +78,10 @@ export default function DashboardPage() {
   });
 
   const isLoading = isLoadingUtilityData || isLoadingCarbonData || isLoadingUserData;
+  const hasUtilityData = utilityData && utilityData.length > 0;
+  
+  // Check if data is still being fetched from Bayou (empty array but loading)
+  const isWaitingForBayou = !hasUtilityData && !isUtilityError;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-8">
@@ -87,6 +104,26 @@ export default function DashboardPage() {
             </Tabs>
           </div>
         </div>
+
+        {isWaitingForBayou && (
+          <Alert className="mb-6 bg-blue-50 border-blue-200">
+            <AlertDescription className="flex items-center justify-between">
+              <span>
+                Your utility data is being processed. This may take a few minutes after completing the authentication.
+              </span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => refetchUtilityData()}
+                disabled={isRefetchingUtility}
+                className="ml-2"
+              >
+                <RefreshCcw className={`h-4 w-4 mr-1 ${isRefetchingUtility ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex mb-4 space-x-2">
           <Button
@@ -118,6 +155,14 @@ export default function DashboardPage() {
               {isLoading ? (
                 <div className="h-[400px] flex items-center justify-center">
                   <p>Loading energy data...</p>
+                </div>
+              ) : isWaitingForBayou ? (
+                <div className="h-[400px] flex flex-col items-center justify-center text-center">
+                  <div className="animate-pulse mb-4">
+                    <div className="h-8 w-8 rounded-full bg-blue-200 mx-auto"></div>
+                  </div>
+                  <p>Waiting for your utility data to be ready...</p>
+                  <p className="text-sm text-muted-foreground mt-2">This may take a few minutes after completing the authentication</p>
                 </div>
               ) : (
                 <EnergyVisualization
