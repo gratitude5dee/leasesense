@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { PersonaProvider } from "@/contexts/PersonaContext";
+import CloudShader from "./components/CloudShader";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -32,6 +33,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <PersonaProvider>
       <TooltipProvider>
+        <CloudShader />
         <Toaster />
         <Sonner />
         <BrowserRouter>
