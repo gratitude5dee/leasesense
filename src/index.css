@@ -109,34 +109,11 @@
 
   /* Ensure content appears above shader background */
   .card {
-    @apply bg-white/90 backdrop-blur-sm relative;
+    @apply bg-white/80 backdrop-blur-sm relative;
   }
   
   /* Add background blur to modals and dropdowns */
   .modal, .dropdown {
     @apply backdrop-blur-sm;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  html, body {
-    @apply h-full w-full m-0 p-0 overflow-x-hidden;
-  }
-
-  body {
-    @apply bg-transparent text-foreground antialiased;
-  }
-
-  .app-container {
-    @apply min-h-screen w-full;
-  }
-
-  /* Make cards appear on top of the shader background */
-  .card {
-    @apply bg-white/90 backdrop-blur-sm z-10 relative;
   }
 }

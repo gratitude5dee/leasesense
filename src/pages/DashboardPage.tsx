@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -84,11 +83,11 @@ export default function DashboardPage() {
   const isWaitingForBayou = !hasUtilityData && !isUtilityError;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
+    <div className="min-h-screen pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Energy Dashboard</h1>
+            <h1 className="text-3xl font-bold text-foreground">Energy Dashboard</h1>
             <p className="text-gray-600 mt-1">
               {persona === 'renter' ? 'Home Energy Usage' : 'Shop Energy Usage'}
             </p>
@@ -106,7 +105,7 @@ export default function DashboardPage() {
         </div>
 
         {isWaitingForBayou && (
-          <Alert className="mb-6 bg-blue-50 border-blue-200">
+          <Alert className="mb-6 bg-blue-50/90 backdrop-blur-sm border-blue-200">
             <AlertDescription className="flex items-center justify-between">
               <span>
                 Your utility data is being processed. This may take a few minutes after completing the authentication.
@@ -150,7 +149,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 bg-white/80 backdrop-blur-md">
             <CardContent className="pt-6">
               {isLoading ? (
                 <div className="h-[400px] flex items-center justify-center">
@@ -185,7 +184,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Recommended Actions</h2>
+          <h2 className="text-2xl font-bold mb-4 text-foreground">Recommended Actions</h2>
           <ActionCardsFeed 
             utilityData={utilityData || []} 
             carbonData={carbonData} 
