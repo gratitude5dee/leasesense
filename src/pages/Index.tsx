@@ -1,10 +1,28 @@
 
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserData } from "@/hooks/useUserData";
 
 const Index = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { data: userData, isLoading } = useUserData();
+
+  useEffect(() => {
+    if (!isLoading) {
+      // If user has already set up their profile, go to dashboard
+      if (userData && userData.user_type) {
+        navigate("/dashboard");
+      } 
+      // If not, direct them to onboarding
+      else if (userData) {
+        navigate("/onboarding");
+      }
+    }
+  }, [userData, isLoading, navigate]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -21,9 +39,11 @@ const Index = () => {
         </div>
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium mb-4">Welcome, {user?.email}</h2>
-          <p className="text-gray-600">Your energy dashboard is coming soon!</p>
+        <div className="bg-white shadow rounded-lg p-6 text-center">
+          <div className="animate-pulse">
+            <h2 className="text-lg font-medium mb-4">Loading your profile...</h2>
+            <p className="text-gray-600">Please wait while we prepare your personalized dashboard.</p>
+          </div>
         </div>
       </main>
     </div>
