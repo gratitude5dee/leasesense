@@ -16,7 +16,7 @@ const utilityCodeMap: Record<string, string> = {
   "Austin Energy": "austin_energy",
   "CPS Energy": "cps_energy",
   "Duke Energy": "duke_energy_carolinas",
-  "Speculoos Power (Test)": "speculoos_power"  // This was incorrect - fixing to use proper code
+  "Speculoos Power (Test)": "speculoos_power"
 };
 
 serve(async (req) => {
@@ -118,8 +118,9 @@ serve(async (req) => {
       });
     }
 
-    // Check if the response contains the necessary customer data
-    if (!customerData.customer || !customerData.customer.id) {
+    // FIX: The Bayou API returns the customer object directly, not wrapped in a customer property
+    // Get onboarding link directly from the customerData object
+    if (!customerData || !customerData.id || !customerData.onboarding_link) {
       console.error('Unexpected Bayou response structure:', customerData);
       return new Response(JSON.stringify({
         error: 'Invalid customer data structure from Bayou API',
@@ -133,7 +134,7 @@ serve(async (req) => {
     // Update user profile with Bayou customer ID
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ bayou_customer_id: customerData.customer.id })
+      .update({ bayou_customer_id: customerData.id })
       .eq('id', user.id);
 
     if (updateError) {
@@ -149,9 +150,9 @@ serve(async (req) => {
 
     console.log('Successfully created Bayou customer and updated profile');
 
-    // Return onboarding link
+    // Return onboarding link directly from the customer object
     return new Response(JSON.stringify({ 
-      onboarding_link: customerData.customer.onboarding_link 
+      onboarding_link: customerData.onboarding_link 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
