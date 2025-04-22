@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html } from '@react-three/drei';
 import { UtilityDataPoint, CarbonIntensityData, VisualizationMode, TimeRange } from '@/types/energy';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useSpring, animated } from '@react-spring/three';
 import * as THREE from 'three';
 
