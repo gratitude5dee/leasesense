@@ -1,10 +1,3 @@
-LeaseSense delivers “energy equity without ownership.” In minutes, tenants authenticate a utility or smart plug, pick “Home” or “Shop,” and receive a dashboard that:
-	•	Explains every dollar & kWh in plain language. Utility data is fetched via Bayou’s one‑click OAuth (<60 s) and normalized to 15‑min intervals, meeting Green‑Button standards.  
-	•	Benchmarks performance against anonymized peers (renters vs. cafés) using EIA RECS and CBECS medians.   
-	•	Recommends low‑lift actions (shift laundry, stagger espresso machines) engineered from NILM‑disaggregated device estimates.  
-	•	Generates shareable “Impact Proofs”—print‑friendly certificates that boost tenant–landlord conversations or green‑marketing for stores.
-	•	Surfaces rebates & C‑PACE financing paths when bigger upgrades make sense.   
-
 ***
 
 # LeaseSense
@@ -26,6 +19,13 @@ LeaseSense delivers “energy equity without ownership.” In minutes, tenants a
 ## Overview
 
 **LeaseSense** is a powerful web application designed to bring energy intelligence directly to tenants of both residential and commercial properties. By seamlessly connecting to their utility provider accounts, users get access to a personalized dashboard that demystifies their energy consumption. The platform benchmarks performance, provides actionable, AI-driven recommendations, and helps users understand their carbon footprint, fostering energy equity without requiring property ownership.
+
+LeaseSense delivers “energy equity without ownership.” In minutes, tenants authenticate a utility or smart plug, pick “Home” or “Shop,” and receive a dashboard that:
+	•	Explains every dollar & kWh in plain language. Utility data is fetched via Bayou’s one‑click OAuth (<60 s) and normalized to 15‑min intervals, meeting Green‑Button standards.  
+	•	Benchmarks performance against anonymized peers (renters vs. cafés) using EIA RECS and CBECS medians.   
+	•	Recommends low‑lift actions (shift laundry, stagger espresso machines) engineered from NILM‑disaggregated device estimates.  
+	•	Generates shareable “Impact Proofs”—print‑friendly certificates that boost tenant–landlord conversations or green‑marketing for stores.
+	•	Surfaces rebates & C‑PACE financing paths when bigger upgrades make sense.   
 
 This repository serves as a comprehensive template for building modern, full-stack applications with a serverless backend, third-party API integrations, and immersive data visualizations.
 
